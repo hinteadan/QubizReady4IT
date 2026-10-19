@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Docs/">
     <File Path="../../Docs/About.md" />
+    <File Path="../../Docs/Functional.md" />
   </Folder>
   <Project Path="KnowledgeGram/KnowledgeGram.csproj" />
 </Solution>

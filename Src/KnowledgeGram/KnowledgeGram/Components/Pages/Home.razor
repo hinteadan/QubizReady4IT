@@ -1,10 +1,10 @@
 @page "/"
 
-@inject IPostRepository Repository
-@inject IFileStorage Storage
+@inject IFeedService Feed
+@inject IPublishingService Publishing
+@inject IEngagementService Engagement
 @inject IUserSession Session
-@inject ISubjectCatalog Subjects
-@inject IContentKindResolver ContentKinds
+@inject ISubjectCatalog SubjectCatalog
 
 <PageTitle>KnowledgeGram</PageTitle>
 
@@ -26,7 +26,6 @@
 
 <div class="container">
 
-    @* ---------- NEW POST ---------- *@
     @if (Session.IsSignedIn)
     {
         <div class="card">
@@ -34,7 +33,7 @@
             <input type="text" placeholder="Title" @bind="newTitle" />
             <textarea rows="3" placeholder="Write your notes here..." @bind="newBody"></textarea>
             <select @bind="newSubject">
-                @foreach (var subject in Subjects.All)
+                @foreach (var subject in subjects)
                 {
                     <option value="@subject">@subject</option>
                 }
@@ -54,12 +53,11 @@
         <div class="card">Log in (top right) to share and comment.</div>
     }
 
-    @* ---------- SEARCH / FILTER ---------- *@
     <div class="card filters">
         <input type="text" placeholder="Search..." @bind="search" style="margin:0" />
         <select @bind="filterSubject" style="margin:0">
             <option value="">All subjects</option>
-            @foreach (var subject in Subjects.All)
+            @foreach (var subject in subjects)
             {
                 <option value="@subject">@subject</option>
             }
@@ -67,11 +65,10 @@
         <button @onclick="LoadFeed">Go</button>
     </div>
 
-    @* ---------- FEED ---------- *@
     @foreach (var post in feed)
     {
         <div class="card post">
-            @if (post.Author == Session.UserName)
+            @if (post.CanDelete)
             {
                 <button class="danger" @onclick="() => DeletePost(post)">Delete</button>
             }
@@ -83,24 +80,21 @@
 
             @if (post.Attachment is not null)
             {
-                var url = Storage.GetUrl(post.Attachment.StoredName);
-                var kind = ContentKinds.Resolve(post.Attachment.OriginalName);
-
-                if (kind == ContentKind.Image)
+                if (post.Attachment.Kind == ContentKind.Image)
                 {
-                    <img src="@url" alt="@post.Attachment.OriginalName" />
+                    <img src="@post.Attachment.Url" alt="@post.Attachment.DisplayName" />
                 }
-                else if (kind == ContentKind.Video)
+                else if (post.Attachment.Kind == ContentKind.Video)
                 {
-                    <video controls src="@url"></video>
+                    <video controls src="@post.Attachment.Url"></video>
                 }
-                else if (kind == ContentKind.Audio)
+                else if (post.Attachment.Kind == ContentKind.Audio)
                 {
-                    <audio controls src="@url"></audio>
+                    <audio controls src="@post.Attachment.Url"></audio>
                 }
                 else
                 {
-                    <p>📎 <a href="@url" target="_blank" download="@post.Attachment.OriginalName">@post.Attachment.OriginalName</a></p>
+                    <p>📎 <a href="@post.Attachment.Url" target="_blank" download="@post.Attachment.DisplayName">@post.Attachment.DisplayName</a></p>
                 }
             }
 
@@ -142,30 +136,36 @@
     string search = "";
     string filterSubject = "";
 
-    IReadOnlyList<Post> feed = Array.Empty<Post>();
+    IReadOnlyList<string> subjects = Array.Empty<string>();
+    IReadOnlyList<PostView> feed = Array.Empty<PostView>();
     Dictionary<int, string> newComments = new();
 
     protected override async Task OnInitializedAsync()
     {
-        newSubject = Subjects.All[0];
+        subjects = SubjectCatalog.All;
+        newSubject = subjects[0];
         await LoadFeed();
     }
 
-    void Login()
+    async Task Login()
     {
         if (string.IsNullOrWhiteSpace(loginName)) return;
         Session.SignIn(loginName);
         loginName = "";
+        await LoadFeed();          // "can delete" depends on who is logged in
     }
 
-    void Logout() => Session.SignOut();
+    async Task Logout()
+    {
+        Session.SignOut();
+        await LoadFeed();
+    }
 
     void OnFileChosen(InputFileChangeEventArgs e) => selectedFile = e.File;
 
     async Task LoadFeed()
     {
-        feed = await Repository.FindAsync(new PostQuery(filterSubject, search));
-
+        feed = await Feed.GetFeedAsync(new PostQuery(filterSubject, search));
         foreach (var post in feed)
         {
             if (!newComments.ContainsKey(post.Id))
@@ -176,63 +176,57 @@
     async Task Publish()
     {
         message = "";
-        if (string.IsNullOrWhiteSpace(newTitle))
+        Stream? stream = null;
+        try
         {
-            message = "Please enter a title.";
-            return;
-        }
-        if (string.IsNullOrWhiteSpace(newBody) && selectedFile is null)
-        {
-            message = "Write something or attach a file.";
-            return;
-        }
-
-        StoredFile? attachment = null;
-        if (selectedFile is not null)
-        {
-            try
+            UploadedFile? upload = null;
+            if (selectedFile is not null)
             {
-                await using var stream = selectedFile.OpenReadStream(Storage.MaxFileSizeBytes);
-                attachment = await Storage.SaveAsync(selectedFile.Name, stream);
+                stream = selectedFile.OpenReadStream(Publishing.MaxFileSizeBytes);
+                upload = new UploadedFile(selectedFile.Name, stream, selectedFile.Size);
             }
-            catch (IOException)
+
+            var result = await Publishing.PublishAsync(new PublishRequest(newTitle, newBody, newSubject, upload));
+            if (!result.Succeeded)
             {
-                message = "That file is too large.";
+                message = result.Error ?? "Could not publish.";
                 return;
             }
         }
-
-        await Repository.AddAsync(new NewPost(
-            Session.UserName!, newTitle.Trim(), newBody.Trim(), newSubject, attachment));
+        catch (IOException)
+        {
+            message = "That file is too large.";
+            return;
+        }
+        finally
+        {
+            if (stream is not null) await stream.DisposeAsync();
+        }
 
         newTitle = "";
         newBody = "";
         selectedFile = null;
-        inputKey++;      // resets the file picker
+        inputKey++;                // resets the file picker
+        await LoadFeed();          // the page has to remember to refresh the feed itself
+    }
+
+    async Task Like(PostView post)
+    {
+        await Engagement.LikeAsync(post.Id);
         await LoadFeed();
     }
 
-    async Task Like(Post post)
+    async Task AddComment(PostView post)
     {
-        await Repository.AddLikeAsync(post.Id);
-        await LoadFeed();
-    }
-
-    async Task AddComment(Post post)
-    {
-        var text = newComments[post.Id];
-        if (string.IsNullOrWhiteSpace(text)) return;
-
-        await Repository.AddCommentAsync(new NewComment(post.Id, Session.UserName!, text.Trim()));
+        var result = await Engagement.CommentAsync(post.Id, newComments[post.Id]);
+        if (!result.Succeeded) return;
         newComments[post.Id] = "";
         await LoadFeed();
     }
 
-    async Task DeletePost(Post post)
+    async Task DeletePost(PostView post)
     {
-        await Repository.DeleteAsync(post.Id);
-        if (post.Attachment is not null)
-            await Storage.DeleteAsync(post.Attachment.StoredName);
+        await Publishing.DeleteAsync(post.Id);
         await LoadFeed();
     }
 }

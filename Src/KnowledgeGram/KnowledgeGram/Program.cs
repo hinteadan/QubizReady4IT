@@ -1,5 +1,6 @@
 using KnowledgeGram.Abstractions;
 using KnowledgeGram.Components;
+using KnowledgeGram.Features;
 using KnowledgeGram.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,11 @@ builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 builder.Services.AddSingleton<IPostRepository, SqlitePostRepository>();
 builder.Services.AddScoped<IUserSession, InMemoryUserSession>();   // scoped = one per browser connection
 builder.Services.AddSingleton<SqliteDatabaseInitializer>();
+
+// The three functional components (scoped, because they depend on the per-connection user session)
+builder.Services.AddScoped<IFeedService, FeedService>();
+builder.Services.AddScoped<IPublishingService, PublishingService>();
+builder.Services.AddScoped<IEngagementService, EngagementService>();
 
 var app = builder.Build();
 
