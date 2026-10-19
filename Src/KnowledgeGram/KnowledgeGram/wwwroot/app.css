@@ -1,0 +1,17 @@
+body { font-family: Segoe UI, Arial, sans-serif; background: #f0f2f5; margin: 0; color: #1c1e21; }
+.topbar { background: #1877f2; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; }
+.topbar h1 { margin: 0; font-size: 24px; }
+.topbar input { padding: 6px; border-radius: 6px; border: none; margin-right: 6px; }
+.topbar button { padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; }
+.container { max-width: 680px; margin: 20px auto; padding: 0 12px; }
+.card { background: white; border-radius: 8px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.card input[type=text], .card textarea, .card select { width: 100%; padding: 8px; margin-bottom: 8px; box-sizing: border-box; border: 1px solid #ccd0d5; border-radius: 6px; font: inherit; }
+.card button { background: #1877f2; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+.card button.link { background: none; color: #65676b; padding: 4px 8px; }
+.card button.danger { background: #e4e6eb; color: #c00; float: right; }
+.meta { color: #65676b; font-size: 13px; margin-bottom: 8px; }
+.subject { background: #e7f3ff; color: #1877f2; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
+.post img, .post video { max-width: 100%; border-radius: 6px; margin: 8px 0; }
+.comment { background: #f0f2f5; padding: 6px 10px; border-radius: 12px; margin: 4px 0; font-size: 14px; }
+.filters { display: flex; gap: 8px; }
+.error { color: #c00; margin: 6px 0; }
