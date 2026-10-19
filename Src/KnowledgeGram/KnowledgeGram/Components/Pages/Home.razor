@@ -1,19 +1,24 @@
 @page "/"
-@using Microsoft.Data.Sqlite
+
+@inject IPostRepository Repository
+@inject IFileStorage Storage
+@inject IUserSession Session
+@inject ISubjectCatalog Subjects
+@inject IContentKindResolver ContentKinds
 
 <PageTitle>KnowledgeGram</PageTitle>
 
 <div class="topbar">
     <h1>📚 KnowledgeGram</h1>
     <div>
-        @if (currentUser == "")
+        @if (!Session.IsSignedIn)
         {
             <input placeholder="Pick a username" @bind="loginName" />
             <button @onclick="Login">Log in</button>
         }
         else
         {
-            <span>Hi, @currentUser! </span>
+            <span>Hi, @Session.UserName! </span>
             <button @onclick="Logout">Log out</button>
         }
     </div>
@@ -22,20 +27,17 @@
 <div class="container">
 
     @* ---------- NEW POST ---------- *@
-    @if (currentUser != "")
+    @if (Session.IsSignedIn)
     {
         <div class="card">
             <h3>Share some knowledge</h3>
             <input type="text" placeholder="Title" @bind="newTitle" />
             <textarea rows="3" placeholder="Write your notes here..." @bind="newBody"></textarea>
             <select @bind="newSubject">
-                <option value="Math">Math</option>
-                <option value="Physics">Physics</option>
-                <option value="Chemistry">Chemistry</option>
-                <option value="Biology">Biology</option>
-                <option value="History">History</option>
-                <option value="Programming">Programming</option>
-                <option value="Other">Other</option>
+                @foreach (var subject in Subjects.All)
+                {
+                    <option value="@subject">@subject</option>
+                }
             </select>
             <div style="margin-bottom:8px">
                 <InputFile @key="inputKey" OnChange="OnFileChosen" />
@@ -57,50 +59,48 @@
         <input type="text" placeholder="Search..." @bind="search" style="margin:0" />
         <select @bind="filterSubject" style="margin:0">
             <option value="">All subjects</option>
-            <option value="Math">Math</option>
-            <option value="Physics">Physics</option>
-            <option value="Chemistry">Chemistry</option>
-            <option value="Biology">Biology</option>
-            <option value="History">History</option>
-            <option value="Programming">Programming</option>
-            <option value="Other">Other</option>
+            @foreach (var subject in Subjects.All)
+            {
+                <option value="@subject">@subject</option>
+            }
         </select>
-        <button @onclick="LoadPosts">Go</button>
+        <button @onclick="LoadFeed">Go</button>
     </div>
 
     @* ---------- FEED ---------- *@
-    @foreach (var post in posts)
+    @foreach (var post in feed)
     {
         <div class="card post">
-            @if (post.Author == currentUser)
+            @if (post.Author == Session.UserName)
             {
                 <button class="danger" @onclick="() => DeletePost(post)">Delete</button>
             }
             <h3>@post.Title</h3>
             <div class="meta">
-                <b>@post.Author</b> · @post.CreatedAt · <span class="subject">@post.Subject</span>
+                <b>@post.Author</b> · @post.CreatedAt.ToString("yyyy-MM-dd HH:mm") · <span class="subject">@post.Subject</span>
             </div>
             <p>@post.Body</p>
 
-            @if (post.FileName != "")
+            @if (post.Attachment is not null)
             {
-                var ext = Path.GetExtension(post.FileName).ToLower();
+                var url = Storage.GetUrl(post.Attachment.StoredName);
+                var kind = ContentKinds.Resolve(post.Attachment.OriginalName);
 
-                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".gif" || ext == ".webp")
+                if (kind == ContentKind.Image)
                 {
-                    <img src="uploads/@post.FileName" alt="@post.OriginalName" />
+                    <img src="@url" alt="@post.Attachment.OriginalName" />
                 }
-                else if (ext == ".mp4" || ext == ".webm" || ext == ".mov")
+                else if (kind == ContentKind.Video)
                 {
-                    <video controls src="uploads/@post.FileName"></video>
+                    <video controls src="@url"></video>
                 }
-                else if (ext == ".mp3" || ext == ".wav")
+                else if (kind == ContentKind.Audio)
                 {
-                    <audio controls src="uploads/@post.FileName"></audio>
+                    <audio controls src="@url"></audio>
                 }
                 else
                 {
-                    <p>📎 <a href="uploads/@post.FileName" target="_blank" download="@post.OriginalName">@post.OriginalName</a></p>
+                    <p>📎 <a href="@url" target="_blank" download="@post.Attachment.OriginalName">@post.Attachment.OriginalName</a></p>
                 }
             }
 
@@ -113,7 +113,7 @@
                 <div class="comment"><b>@c.Author</b>: @c.Text</div>
             }
 
-            @if (currentUser != "")
+            @if (Session.IsSignedIn)
             {
                 <div style="display:flex; gap:6px; margin-top:8px">
                     <input type="text" placeholder="Write a comment..." @bind="newComments[post.Id]" @bind:event="oninput" style="margin:0" />
@@ -123,232 +123,116 @@
         </div>
     }
 
-    @if (posts.Count == 0)
+    @if (feed.Count == 0)
     {
         <div class="card">Nothing here yet. Be the first to share something!</div>
     }
 </div>
 
 @code {
-    // ---------- state ----------
-    string currentUser = "";
     string loginName = "";
 
     string newTitle = "";
     string newBody = "";
-    string newSubject = "Math";
-    IBrowserFile selectedFile = null;
+    string newSubject = "";
+    IBrowserFile? selectedFile;
     int inputKey = 0;
     string message = "";
 
     string search = "";
     string filterSubject = "";
 
-    List<PostRow> posts = new List<PostRow>();
-    Dictionary<int, string> newComments = new Dictionary<int, string>();
+    IReadOnlyList<Post> feed = Array.Empty<Post>();
+    Dictionary<int, string> newComments = new();
 
-    class PostRow
+    protected override async Task OnInitializedAsync()
     {
-        public int Id;
-        public string Author, Title, Body, Subject, FileName, OriginalName, CreatedAt;
-        public int Likes;
-        public List<CommentRow> Comments = new List<CommentRow>();
+        newSubject = Subjects.All[0];
+        await LoadFeed();
     }
 
-    class CommentRow
-    {
-        public string Author, Text;
-    }
-
-    // ---------- startup ----------
-    protected override void OnInitialized()
-    {
-        var conn = new SqliteConnection("Data Source=knowledgegram.db");
-        conn.Open();
-        var cmd = conn.CreateCommand();
-        cmd.CommandText =
-            "CREATE TABLE IF NOT EXISTS Posts (Id INTEGER PRIMARY KEY AUTOINCREMENT, Author TEXT, Title TEXT, Body TEXT, Subject TEXT, FileName TEXT, OriginalName TEXT, CreatedAt TEXT, Likes INTEGER);" +
-            "CREATE TABLE IF NOT EXISTS Comments (Id INTEGER PRIMARY KEY AUTOINCREMENT, PostId INTEGER, Author TEXT, Text TEXT, CreatedAt TEXT);";
-        cmd.ExecuteNonQuery();
-        conn.Close();
-
-        LoadPosts();
-    }
-
-    // ---------- login ----------
     void Login()
     {
-        if (loginName.Trim() == "") return;
-        currentUser = loginName.Trim();
+        if (string.IsNullOrWhiteSpace(loginName)) return;
+        Session.SignIn(loginName);
         loginName = "";
     }
 
-    void Logout()
-    {
-        currentUser = "";
-    }
+    void Logout() => Session.SignOut();
 
-    // ---------- upload ----------
-    void OnFileChosen(InputFileChangeEventArgs e)
+    void OnFileChosen(InputFileChangeEventArgs e) => selectedFile = e.File;
+
+    async Task LoadFeed()
     {
-        selectedFile = e.File;
+        feed = await Repository.FindAsync(new PostQuery(filterSubject, search));
+
+        foreach (var post in feed)
+        {
+            if (!newComments.ContainsKey(post.Id))
+                newComments[post.Id] = "";
+        }
     }
 
     async Task Publish()
     {
         message = "";
-        if (newTitle.Trim() == "")
+        if (string.IsNullOrWhiteSpace(newTitle))
         {
             message = "Please enter a title.";
             return;
         }
-        if (newBody.Trim() == "" && selectedFile == null)
+        if (string.IsNullOrWhiteSpace(newBody) && selectedFile is null)
         {
             message = "Write something or attach a file.";
             return;
         }
 
-        string storedName = "";
-        string originalName = "";
-        if (selectedFile != null)
+        StoredFile? attachment = null;
+        if (selectedFile is not null)
         {
-            originalName = selectedFile.Name;
-            storedName = Guid.NewGuid().ToString() + Path.GetExtension(originalName);
-
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            Directory.CreateDirectory(folder);
-
-            var fs = new FileStream(Path.Combine(folder, storedName), FileMode.Create);
-            var upload = selectedFile.OpenReadStream(100 * 1024 * 1024);
-            await upload.CopyToAsync(fs);
-            fs.Close();
-            upload.Close();
+            try
+            {
+                await using var stream = selectedFile.OpenReadStream(Storage.MaxFileSizeBytes);
+                attachment = await Storage.SaveAsync(selectedFile.Name, stream);
+            }
+            catch (IOException)
+            {
+                message = "That file is too large.";
+                return;
+            }
         }
 
-        var conn = new SqliteConnection("Data Source=knowledgegram.db");
-        conn.Open();
-        var cmd = conn.CreateCommand();
-        cmd.CommandText = "INSERT INTO Posts (Author, Title, Body, Subject, FileName, OriginalName, CreatedAt, Likes) VALUES (@a, @t, @b, @s, @f, @o, @c, 0)";
-        cmd.Parameters.AddWithValue("@a", currentUser);
-        cmd.Parameters.AddWithValue("@t", newTitle);
-        cmd.Parameters.AddWithValue("@b", newBody);
-        cmd.Parameters.AddWithValue("@s", newSubject);
-        cmd.Parameters.AddWithValue("@f", storedName);
-        cmd.Parameters.AddWithValue("@o", originalName);
-        cmd.Parameters.AddWithValue("@c", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
-        cmd.ExecuteNonQuery();
-        conn.Close();
+        await Repository.AddAsync(new NewPost(
+            Session.UserName!, newTitle.Trim(), newBody.Trim(), newSubject, attachment));
 
         newTitle = "";
         newBody = "";
         selectedFile = null;
         inputKey++;      // resets the file picker
-        LoadPosts();
+        await LoadFeed();
     }
 
-    // ---------- feed ----------
-    void LoadPosts()
+    async Task Like(Post post)
     {
-        posts = new List<PostRow>();
-
-        var conn = new SqliteConnection("Data Source=knowledgegram.db");
-        conn.Open();
-
-        var cmd = conn.CreateCommand();
-        cmd.CommandText =
-            "SELECT Id, Author, Title, Body, Subject, FileName, OriginalName, CreatedAt, Likes FROM Posts " +
-            "WHERE (@s = '' OR Subject = @s) AND (Title LIKE @q OR Body LIKE @q) ORDER BY Id DESC";
-        cmd.Parameters.AddWithValue("@s", filterSubject);
-        cmd.Parameters.AddWithValue("@q", "%" + search + "%");
-        var reader = cmd.ExecuteReader();
-        while (reader.Read())
-        {
-            var p = new PostRow();
-            p.Id = reader.GetInt32(0);
-            p.Author = reader.GetString(1);
-            p.Title = reader.GetString(2);
-            p.Body = reader.GetString(3);
-            p.Subject = reader.GetString(4);
-            p.FileName = reader.GetString(5);
-            p.OriginalName = reader.GetString(6);
-            p.CreatedAt = reader.GetString(7);
-            p.Likes = reader.GetInt32(8);
-            posts.Add(p);
-        }
-        reader.Close();
-
-        foreach (var p in posts)
-        {
-            var cmd2 = conn.CreateCommand();
-            cmd2.CommandText = "SELECT Author, Text FROM Comments WHERE PostId = @id ORDER BY Id";
-            cmd2.Parameters.AddWithValue("@id", p.Id);
-            var reader2 = cmd2.ExecuteReader();
-            while (reader2.Read())
-            {
-                var c = new CommentRow();
-                c.Author = reader2.GetString(0);
-                c.Text = reader2.GetString(1);
-                p.Comments.Add(c);
-            }
-            reader2.Close();
-
-            if (!newComments.ContainsKey(p.Id))
-            {
-                newComments[p.Id] = "";
-            }
-        }
-
-        conn.Close();
+        await Repository.AddLikeAsync(post.Id);
+        await LoadFeed();
     }
 
-    // ---------- likes / comments / delete ----------
-    void Like(PostRow post)
+    async Task AddComment(Post post)
     {
-        var conn = new SqliteConnection("Data Source=knowledgegram.db");
-        conn.Open();
-        var cmd = conn.CreateCommand();
-        cmd.CommandText = "UPDATE Posts SET Likes = Likes + 1 WHERE Id = @id";
-        cmd.Parameters.AddWithValue("@id", post.Id);
-        cmd.ExecuteNonQuery();
-        conn.Close();
-        LoadPosts();
-    }
+        var text = newComments[post.Id];
+        if (string.IsNullOrWhiteSpace(text)) return;
 
-    void AddComment(PostRow post)
-    {
-        string text = newComments[post.Id];
-        if (text == null || text.Trim() == "") return;
-
-        var conn = new SqliteConnection("Data Source=knowledgegram.db");
-        conn.Open();
-        var cmd = conn.CreateCommand();
-        cmd.CommandText = "INSERT INTO Comments (PostId, Author, Text, CreatedAt) VALUES (@p, @a, @t, @c)";
-        cmd.Parameters.AddWithValue("@p", post.Id);
-        cmd.Parameters.AddWithValue("@a", currentUser);
-        cmd.Parameters.AddWithValue("@t", text);
-        cmd.Parameters.AddWithValue("@c", DateTime.Now.ToString("yyyy-MM-dd HH:mm"));
-        cmd.ExecuteNonQuery();
-        conn.Close();
-
+        await Repository.AddCommentAsync(new NewComment(post.Id, Session.UserName!, text.Trim()));
         newComments[post.Id] = "";
-        LoadPosts();
+        await LoadFeed();
     }
 
-    void DeletePost(PostRow post)
+    async Task DeletePost(Post post)
     {
-        if (post.FileName != "")
-        {
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", post.FileName);
-            if (File.Exists(path)) File.Delete(path);
-        }
-
-        var conn = new SqliteConnection("Data Source=knowledgegram.db");
-        conn.Open();
-        var cmd = conn.CreateCommand();
-        cmd.CommandText = "DELETE FROM Comments WHERE PostId = @id; DELETE FROM Posts WHERE Id = @id;";
-        cmd.Parameters.AddWithValue("@id", post.Id);
-        cmd.ExecuteNonQuery();
-        conn.Close();
-        LoadPosts();
+        await Repository.DeleteAsync(post.Id);
+        if (post.Attachment is not null)
+            await Storage.DeleteAsync(post.Attachment.StoredName);
+        await LoadFeed();
     }
 }
