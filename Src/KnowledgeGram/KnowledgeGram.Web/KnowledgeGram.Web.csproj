@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\KnowledgeGram.Models\KnowledgeGram.Models.csproj" />
+    <ProjectReference Include="..\KnowledgeGram.Utilities\KnowledgeGram.Utilities.csproj" />
+    <ProjectReference Include="..\KnowledgeGram.Managers\KnowledgeGram.Managers.csproj" />
+    <ProjectReference Include="..\KnowledgeGram.Engines\KnowledgeGram.Engines.csproj" />
+    <ProjectReference Include="..\KnowledgeGram.ResourceAccess\KnowledgeGram.ResourceAccess.csproj" />
+  </ItemGroup>
+</Project>

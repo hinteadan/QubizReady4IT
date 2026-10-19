@@ -1,6 +1,13 @@
 <Solution>
   <Folder Name="/Docs/">
     <File Path="../../Docs/About.md" />
+    <File Path="../../Docs/Volatile.md" />
+    <File Path="README.md" />
   </Folder>
-  <Project Path="KnowledgeGram/KnowledgeGram.csproj" />
+  <Project Path="KnowledgeGram.Engines/KnowledgeGram.Engines.csproj" />
+  <Project Path="KnowledgeGram.Managers/KnowledgeGram.Managers.csproj" />
+  <Project Path="KnowledgeGram.Models/KnowledgeGram.Models.csproj" />
+  <Project Path="KnowledgeGram.ResourceAccess/KnowledgeGram.ResourceAccess.csproj" />
+  <Project Path="KnowledgeGram.Utilities/KnowledgeGram.Utilities.csproj" />
+  <Project Path="KnowledgeGram.Web/KnowledgeGram.Web.csproj" />
 </Solution>

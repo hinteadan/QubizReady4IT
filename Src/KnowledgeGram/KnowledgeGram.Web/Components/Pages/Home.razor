@@ -1,0 +1,229 @@
+@page "/"
+
+@inject IContentManager Content
+@inject IUserSession Session
+
+<PageTitle>KnowledgeGram</PageTitle>
+
+<div class="topbar">
+    <h1>📚 KnowledgeGram</h1>
+    <div>
+        @if (!Session.IsSignedIn)
+        {
+            <input placeholder="Pick a username" @bind="loginName" />
+            <button @onclick="Login">Log in</button>
+        }
+        else
+        {
+            <span>Hi, @Session.UserName! </span>
+            <button @onclick="Logout">Log out</button>
+        }
+    </div>
+</div>
+
+<div class="container">
+
+    @if (Session.IsSignedIn)
+    {
+        <div class="card">
+            <h3>Share some knowledge</h3>
+            <input type="text" placeholder="Title" @bind="newTitle" />
+            <textarea rows="3" placeholder="Write your notes here..." @bind="newBody"></textarea>
+            <select @bind="newSubject">
+                @foreach (var subject in subjects)
+                {
+                    <option value="@subject">@subject</option>
+                }
+            </select>
+            <div style="margin-bottom:8px">
+                <InputFile @key="inputKey" OnChange="OnFileChosen" />
+            </div>
+            @if (message != "")
+            {
+                <div class="error">@message</div>
+            }
+            <button @onclick="Publish">Publish</button>
+        </div>
+    }
+    else
+    {
+        <div class="card">Log in (top right) to share and comment.</div>
+    }
+
+    <div class="card filters">
+        <input type="text" placeholder="Search..." @bind="search" style="margin:0" />
+        <select @bind="filterSubject" style="margin:0">
+            <option value="">All subjects</option>
+            @foreach (var subject in subjects)
+            {
+                <option value="@subject">@subject</option>
+            }
+        </select>
+        <button @onclick="LoadFeed">Go</button>
+    </div>
+
+    @foreach (var post in feed)
+    {
+        <div class="card post">
+            @if (post.CanDelete)
+            {
+                <button class="danger" @onclick="() => DeletePost(post)">Delete</button>
+            }
+            <h3>@post.Title</h3>
+            <div class="meta">
+                <b>@post.Author</b> · @post.CreatedAt.ToString("yyyy-MM-dd HH:mm") · <span class="subject">@post.Subject</span>
+            </div>
+            <p>@post.Body</p>
+
+            @if (post.Attachment is not null)
+            {
+                if (post.Attachment.Kind == ContentKind.Image)
+                {
+                    <img src="@post.Attachment.Url" alt="@post.Attachment.DisplayName" />
+                }
+                else if (post.Attachment.Kind == ContentKind.Video)
+                {
+                    <video controls src="@post.Attachment.Url"></video>
+                }
+                else if (post.Attachment.Kind == ContentKind.Audio)
+                {
+                    <audio controls src="@post.Attachment.Url"></audio>
+                }
+                else
+                {
+                    <p>📎 <a href="@post.Attachment.Url" target="_blank" download="@post.Attachment.DisplayName">@post.Attachment.DisplayName</a></p>
+                }
+            }
+
+            <div>
+                <button class="link" @onclick="() => Like(post)">👍 @post.Likes</button>
+            </div>
+
+            @foreach (var c in post.Comments)
+            {
+                <div class="comment"><b>@c.Author</b>: @c.Text</div>
+            }
+
+            @if (Session.IsSignedIn)
+            {
+                <div style="display:flex; gap:6px; margin-top:8px">
+                    <input type="text" placeholder="Write a comment..." @bind="newComments[post.Id]" @bind:event="oninput" style="margin:0" />
+                    <button @onclick="() => AddComment(post)">Send</button>
+                </div>
+            }
+        </div>
+    }
+
+    @if (feed.Count == 0)
+    {
+        <div class="card">Nothing here yet. Be the first to share something!</div>
+    }
+</div>
+
+@code {
+    string loginName = "";
+
+    string newTitle = "";
+    string newBody = "";
+    string newSubject = "";
+    IBrowserFile? selectedFile;
+    int inputKey = 0;
+    string message = "";
+
+    string search = "";
+    string filterSubject = "";
+
+    IReadOnlyList<string> subjects = Array.Empty<string>();
+    IReadOnlyList<PostView> feed = Array.Empty<PostView>();
+    Dictionary<int, string> newComments = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        subjects = Content.Subjects;
+        newSubject = subjects[0];
+        await LoadFeed();
+    }
+
+    async Task Login()
+    {
+        if (string.IsNullOrWhiteSpace(loginName)) return;
+        Session.SignIn(loginName);
+        loginName = "";
+        await LoadFeed();          // "can delete" depends on who is logged in
+    }
+
+    async Task Logout()
+    {
+        Session.SignOut();
+        await LoadFeed();
+    }
+
+    void OnFileChosen(InputFileChangeEventArgs e) => selectedFile = e.File;
+
+    async Task LoadFeed()
+    {
+        feed = await Content.BrowseAsync(new PostQuery(filterSubject, search));
+        foreach (var post in feed)
+        {
+            if (!newComments.ContainsKey(post.Id))
+                newComments[post.Id] = "";
+        }
+    }
+
+    async Task Publish()
+    {
+        message = "";
+        Stream? stream = null;
+        try
+        {
+            UploadedFile? upload = null;
+            if (selectedFile is not null)
+            {
+                stream = selectedFile.OpenReadStream(Content.UploadLimitBytes);
+                upload = new UploadedFile(selectedFile.Name, stream, selectedFile.Size);
+            }
+
+            var result = await Content.PublishAsync(new PublishRequest(newTitle, newBody, newSubject, upload));
+            if (!result.Succeeded)
+            {
+                message = result.Error ?? "Could not publish.";
+                return;
+            }
+        }
+        catch (IOException)
+        {
+            message = "That file is too large.";
+            return;
+        }
+        finally
+        {
+            if (stream is not null) await stream.DisposeAsync();
+        }
+
+        newTitle = "";
+        newBody = "";
+        selectedFile = null;
+        inputKey++;                // resets the file picker
+        await LoadFeed();
+    }
+
+    async Task Like(PostView post)
+    {
+        await Content.LikeAsync(post.Id);
+        await LoadFeed();
+    }
+
+    async Task AddComment(PostView post)
+    {
+        var result = await Content.CommentAsync(post.Id, newComments[post.Id]);
+        if (!result.Succeeded) return;
+        newComments[post.Id] = "";
+        await LoadFeed();
+    }
+
+    async Task DeletePost(PostView post)
+    {
+        await Content.DeleteAsync(post.Id);
+        await LoadFeed();
+    }
+}
