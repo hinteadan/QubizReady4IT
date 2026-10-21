@@ -1,0 +1,12 @@
+services:
+  # Renders Structurizr DSL workspaces (structurizr/lite is deprecated; "local" replaces it).
+  structurizr:
+    image: structurizr/structurizr
+    container_name: knowledgegram-structurizr
+    command: local
+    user: "0:0"
+    ports:
+      - "8091:8080"
+    volumes:
+      - ./structurizr/workspace:/usr/local/structurizr
+    restart: unless-stopped

@@ -1,0 +1,908 @@
+{
+  "configuration" : { },
+  "description" : "C4 model for the KnowledgeGram platform",
+  "documentation" : { },
+  "id" : 1,
+  "lastModifiedDate" : "2026-10-21T09:18:25Z",
+  "model" : {
+    "people" : [ {
+      "description" : "A user who accesses and contributes knowledge content",
+      "id" : "1",
+      "name" : "Client",
+      "properties" : {
+        "structurizr.dsl.identifier" : "client"
+      },
+      "relationships" : [ {
+        "description" : "Uses to access and contribute knowledge",
+        "destinationId" : "6",
+        "id" : "25",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Will authenticate through",
+        "destinationId" : "3",
+        "id" : "27",
+        "sourceId" : "1",
+        "tags" : "Relationship,Planned"
+      }, {
+        "description" : "Uses",
+        "destinationId" : "7",
+        "id" : "32",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Browses and contributes knowledge through",
+        "destinationId" : "8",
+        "id" : "49",
+        "sourceId" : "1",
+        "tags" : "Relationship",
+        "technology" : "HTTPS / Blazor"
+      } ],
+      "tags" : "Element,Person"
+    }, {
+      "description" : "A user who administers the KnowledgeGram platform",
+      "id" : "2",
+      "name" : "Administrator",
+      "properties" : {
+        "structurizr.dsl.identifier" : "administrator"
+      },
+      "relationships" : [ {
+        "description" : "Uses to administer the platform",
+        "destinationId" : "6",
+        "id" : "26",
+        "sourceId" : "2",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      }, {
+        "description" : "Will authenticate through",
+        "destinationId" : "3",
+        "id" : "28",
+        "sourceId" : "2",
+        "tags" : "Relationship,Planned"
+      }, {
+        "description" : "Uses",
+        "destinationId" : "7",
+        "id" : "33",
+        "sourceId" : "2",
+        "tags" : "Relationship",
+        "technology" : "HTTPS"
+      } ],
+      "tags" : "Element,Person"
+    } ],
+    "softwareSystems" : [ {
+      "description" : "Shared identity provider for clients and administrators",
+      "documentation" : { },
+      "id" : "3",
+      "name" : "Microsoft Entra ID",
+      "properties" : {
+        "structurizr.dsl.identifier" : "entra"
+      },
+      "tags" : "Element,Software System,Existing System,External System"
+    }, {
+      "description" : "External service for delivering KnowledgeGram notifications",
+      "documentation" : { },
+      "id" : "4",
+      "name" : "Notification Service",
+      "properties" : {
+        "structurizr.dsl.identifier" : "notificationService"
+      },
+      "tags" : "Element,Software System,Planned System,External System"
+    }, {
+      "description" : "Purchased external knowledge and learning solution",
+      "documentation" : { },
+      "id" : "5",
+      "name" : "Microsoft Learn",
+      "properties" : {
+        "structurizr.dsl.identifier" : "microsoftLearn"
+      },
+      "tags" : "Element,Software System,Existing System,External System"
+    }, {
+      "containers" : [ {
+        "components" : [ {
+          "description" : "Displays the feed and handles search, publishing, likes, comments, and local sign-in",
+          "documentation" : { },
+          "id" : "8",
+          "name" : "Home Page",
+          "properties" : {
+            "structurizr.dsl.identifier" : "homePage"
+          },
+          "relationships" : [ {
+            "description" : "Loads the feed through",
+            "destinationId" : "9",
+            "id" : "50",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Publishes and deletes posts through",
+            "destinationId" : "10",
+            "id" : "51",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Likes and comments through",
+            "destinationId" : "11",
+            "id" : "52",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Signs in, signs out, and reads the current user",
+            "destinationId" : "14",
+            "id" : "53",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Loads subjects from",
+            "destinationId" : "16",
+            "id" : "54",
+            "sourceId" : "8",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "Blazor / Home.razor"
+        }, {
+          "description" : "Browses, searches, and filters posts; builds attachment views and determines delete-button visibility",
+          "documentation" : { },
+          "id" : "9",
+          "name" : "Feed Service",
+          "properties" : {
+            "structurizr.dsl.identifier" : "feedService"
+          },
+          "relationships" : [ {
+            "description" : "Queries posts and comments through",
+            "destinationId" : "12",
+            "id" : "55",
+            "sourceId" : "9",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Gets attachment URLs from",
+            "destinationId" : "13",
+            "id" : "56",
+            "sourceId" : "9",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Classifies attachments through",
+            "destinationId" : "15",
+            "id" : "57",
+            "sourceId" : "9",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Reads the current user to determine delete-button visibility",
+            "destinationId" : "14",
+            "id" : "58",
+            "sourceId" : "9",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "C# / IFeedService / FeedService"
+        }, {
+          "description" : "Validates and publishes posts and attachments; deletes posts owned by the current user",
+          "documentation" : { },
+          "id" : "10",
+          "name" : "Publishing Service",
+          "properties" : {
+            "structurizr.dsl.identifier" : "publishingService"
+          },
+          "relationships" : [ {
+            "description" : "Creates, retrieves, and deletes posts through",
+            "destinationId" : "12",
+            "id" : "59",
+            "sourceId" : "10",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Checks upload size and saves and deletes attachments through",
+            "destinationId" : "13",
+            "id" : "60",
+            "sourceId" : "10",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Checks sign-in and post ownership using",
+            "destinationId" : "14",
+            "id" : "61",
+            "sourceId" : "10",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Validates subjects against",
+            "destinationId" : "16",
+            "id" : "62",
+            "sourceId" : "10",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "C# / IPublishingService / PublishingService"
+        }, {
+          "description" : "Adds likes and validates and adds comments",
+          "documentation" : { },
+          "id" : "11",
+          "name" : "Engagement Service",
+          "properties" : {
+            "structurizr.dsl.identifier" : "engagementService"
+          },
+          "relationships" : [ {
+            "description" : "Updates likes and adds comments through",
+            "destinationId" : "12",
+            "id" : "63",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Checks sign-in and identifies comment authors using",
+            "destinationId" : "14",
+            "id" : "64",
+            "sourceId" : "11",
+            "tags" : "Relationship"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "C# / IEngagementService / EngagementService"
+        }, {
+          "description" : "Persists and queries posts, comments, and like counts",
+          "documentation" : { },
+          "id" : "12",
+          "name" : "Post Repository",
+          "properties" : {
+            "structurizr.dsl.identifier" : "postRepository"
+          },
+          "relationships" : [ {
+            "description" : "Gets post and comment timestamps from",
+            "destinationId" : "17",
+            "id" : "65",
+            "sourceId" : "12",
+            "tags" : "Relationship"
+          }, {
+            "description" : "Reads and writes posts, comments, and engagement data",
+            "destinationId" : "18",
+            "id" : "66",
+            "sourceId" : "12",
+            "tags" : "Relationship",
+            "technology" : "SQLite"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "C# / IPostRepository / SqlitePostRepository"
+        }, {
+          "description" : "Saves and deletes uploaded files and provides their public URLs",
+          "documentation" : { },
+          "id" : "13",
+          "name" : "File Storage Access",
+          "properties" : {
+            "structurizr.dsl.identifier" : "fileStorageAccess"
+          },
+          "relationships" : [ {
+            "description" : "Stores and retrieves uploaded learning materials",
+            "destinationId" : "19",
+            "id" : "67",
+            "sourceId" : "13",
+            "tags" : "Relationship",
+            "technology" : "File I/O"
+          } ],
+          "tags" : "Element,Component",
+          "technology" : "C# / IFileStorage / LocalFileStorage"
+        }, {
+          "description" : "Stores the chosen username for the browser connection; not Entra authentication",
+          "documentation" : { },
+          "id" : "14",
+          "name" : "User Session",
+          "properties" : {
+            "structurizr.dsl.identifier" : "userSession"
+          },
+          "tags" : "Element,Component",
+          "technology" : "C# / IUserSession / InMemoryUserSession"
+        }, {
+          "description" : "Classifies attachments as images, video, audio, or documents using their file extensions",
+          "documentation" : { },
+          "id" : "15",
+          "name" : "Content Kind Resolver",
+          "properties" : {
+            "structurizr.dsl.identifier" : "contentKindResolver"
+          },
+          "tags" : "Element,Component",
+          "technology" : "C# / IContentKindResolver / ExtensionContentKindResolver"
+        }, {
+          "description" : "Provides the fixed list of subjects used by the UI and publishing validation",
+          "documentation" : { },
+          "id" : "16",
+          "name" : "Subject Catalog",
+          "properties" : {
+            "structurizr.dsl.identifier" : "subjectCatalog"
+          },
+          "tags" : "Element,Component",
+          "technology" : "C# / ISubjectCatalog / StaticSubjectCatalog"
+        }, {
+          "description" : "Provides the current time for post and comment timestamps",
+          "documentation" : { },
+          "id" : "17",
+          "name" : "Clock",
+          "properties" : {
+            "structurizr.dsl.identifier" : "clock"
+          },
+          "tags" : "Element,Component",
+          "technology" : "C# / IClock / SystemClock"
+        } ],
+        "description" : "Blazor Server application providing the user interface and feed, publishing, and engagement workflows",
+        "documentation" : { },
+        "id" : "7",
+        "name" : "KnowledgeGram Web App",
+        "properties" : {
+          "structurizr.dsl.identifier" : "webApp"
+        },
+        "relationships" : [ {
+          "description" : "Reads and writes posts, comments, and engagement data",
+          "destinationId" : "18",
+          "id" : "34",
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "SQLite"
+        }, {
+          "description" : "Stores and retrieves uploaded learning materials",
+          "destinationId" : "19",
+          "id" : "35",
+          "sourceId" : "7",
+          "tags" : "Relationship",
+          "technology" : "File I/O"
+        }, {
+          "description" : "Will use for sign-in",
+          "destinationId" : "3",
+          "id" : "36",
+          "sourceId" : "7",
+          "tags" : "Relationship,Planned"
+        }, {
+          "description" : "Will send notifications through",
+          "destinationId" : "4",
+          "id" : "37",
+          "sourceId" : "7",
+          "tags" : "Relationship,Planned,Synchronous"
+        }, {
+          "description" : "Will integrate with purchased learning content",
+          "destinationId" : "5",
+          "id" : "38",
+          "sourceId" : "7",
+          "tags" : "Relationship,Planned,Synchronous"
+        }, {
+          "description" : "Will enqueue notification requests on",
+          "destinationId" : "21",
+          "id" : "41",
+          "sourceId" : "7",
+          "tags" : "Relationship,Planned"
+        }, {
+          "description" : "Will enqueue learning content requests on",
+          "destinationId" : "23",
+          "id" : "45",
+          "sourceId" : "7",
+          "tags" : "Relationship,Planned"
+        } ],
+        "tags" : "Element,Container",
+        "technology" : "ASP.NET Core / Blazor Server"
+      }, {
+        "description" : "Stores knowledge posts, comments, and engagement data",
+        "documentation" : { },
+        "id" : "18",
+        "name" : "Content Database",
+        "properties" : {
+          "structurizr.dsl.identifier" : "contentDatabase"
+        },
+        "tags" : "Element,Container,Database",
+        "technology" : "SQLite"
+      }, {
+        "description" : "Stores uploaded learning materials on the web server's disk",
+        "documentation" : { },
+        "id" : "19",
+        "name" : "Local File Storage",
+        "properties" : {
+          "structurizr.dsl.identifier" : "fileStorage"
+        },
+        "tags" : "Element,Container",
+        "technology" : "File system"
+      }, {
+        "description" : "Planned: checks for new content matching user preferences and requests notifications when matches are found",
+        "documentation" : { },
+        "id" : "20",
+        "name" : "Content Notification Function",
+        "properties" : {
+          "structurizr.dsl.identifier" : "contentNotificationFunction"
+        },
+        "relationships" : [ {
+          "description" : "Will retrieve user preferences and check for matching new content via",
+          "destinationId" : "7",
+          "id" : "39",
+          "sourceId" : "20",
+          "tags" : "Relationship,Planned"
+        }, {
+          "description" : "Will send notifications about matching new content through",
+          "destinationId" : "4",
+          "id" : "40",
+          "sourceId" : "20",
+          "tags" : "Relationship,Planned,Synchronous"
+        }, {
+          "description" : "Will enqueue notifications about matching new content on",
+          "destinationId" : "21",
+          "id" : "42",
+          "sourceId" : "20",
+          "tags" : "Relationship,Planned"
+        } ],
+        "tags" : "Element,Container,Planned System,Content Checker",
+        "technology" : "Azure Functions"
+      }, {
+        "description" : "Planned: queues notification requests from the Web App and Content Notification Function",
+        "documentation" : { },
+        "id" : "21",
+        "name" : "Notification Bus",
+        "properties" : {
+          "structurizr.dsl.identifier" : "notificationBus"
+        },
+        "tags" : "Element,Container,Planned System,Async Alternative,Message Bus",
+        "technology" : "Message bus"
+      }, {
+        "description" : "Planned: consumes queued notification requests and invokes the Notification Service",
+        "documentation" : { },
+        "id" : "22",
+        "name" : "Notification Processor Function",
+        "properties" : {
+          "structurizr.dsl.identifier" : "notificationProcessor"
+        },
+        "relationships" : [ {
+          "description" : "Will consume notification requests from",
+          "destinationId" : "21",
+          "id" : "43",
+          "sourceId" : "22",
+          "tags" : "Relationship,Planned"
+        }, {
+          "description" : "Will invoke to deliver queued notifications",
+          "destinationId" : "4",
+          "id" : "44",
+          "sourceId" : "22",
+          "tags" : "Relationship,Planned"
+        } ],
+        "tags" : "Element,Container,Planned System,Async Alternative,Message Processor",
+        "technology" : "Azure Functions"
+      }, {
+        "description" : "Planned: queues requests to retrieve content from Microsoft Learn",
+        "documentation" : { },
+        "id" : "23",
+        "name" : "Learning Integration Bus",
+        "properties" : {
+          "structurizr.dsl.identifier" : "learningBus"
+        },
+        "tags" : "Element,Container,Planned System,Async Alternative,Message Bus",
+        "technology" : "Message bus"
+      }, {
+        "description" : "Planned: consumes learning requests, retrieves Microsoft Learn content, and submits results to the Web App for persistence",
+        "documentation" : { },
+        "id" : "24",
+        "name" : "Learning Integration Function",
+        "properties" : {
+          "structurizr.dsl.identifier" : "learningProcessor"
+        },
+        "relationships" : [ {
+          "description" : "Will consume learning content requests from",
+          "destinationId" : "23",
+          "id" : "46",
+          "sourceId" : "24",
+          "tags" : "Relationship,Planned"
+        }, {
+          "description" : "Will retrieve requested learning content from",
+          "destinationId" : "5",
+          "id" : "47",
+          "sourceId" : "24",
+          "tags" : "Relationship,Planned"
+        }, {
+          "description" : "Will submit results for storage in the Content Database or Local File Storage",
+          "destinationId" : "7",
+          "id" : "48",
+          "sourceId" : "24",
+          "tags" : "Relationship,Planned"
+        } ],
+        "tags" : "Element,Container,Planned System,Async Alternative,Message Processor",
+        "technology" : "Azure Functions"
+      } ],
+      "description" : "A knowledge-sharing platform where clients access and contribute learning content, and administrators manage the platform",
+      "documentation" : { },
+      "id" : "6",
+      "name" : "KnowledgeGram Platform",
+      "properties" : {
+        "structurizr.dsl.identifier" : "knowledgeGram"
+      },
+      "relationships" : [ {
+        "description" : "Will use for sign-in",
+        "destinationId" : "3",
+        "id" : "29",
+        "sourceId" : "6",
+        "tags" : "Relationship,Planned"
+      }, {
+        "description" : "Will send notifications through",
+        "destinationId" : "4",
+        "id" : "30",
+        "sourceId" : "6",
+        "tags" : "Relationship,Planned"
+      }, {
+        "description" : "Will integrate with purchased learning content",
+        "destinationId" : "5",
+        "id" : "31",
+        "sourceId" : "6",
+        "tags" : "Relationship,Planned"
+      } ],
+      "tags" : "Element,Software System"
+    } ]
+  },
+  "name" : "KnowledgeGram",
+  "properties" : {
+    "structurizr.inspection.error" : "37",
+    "structurizr.dsl" : "d29ya3NwYWNlICJLbm93bGVkZ2VHcmFtIiAiQzQgbW9kZWwgZm9yIHRoZSBLbm93bGVkZ2VHcmFtIHBsYXRmb3JtIiB7CgogICAgbW9kZWwgewogICAgICAgIGNsaWVudCA9IHBlcnNvbiAiQ2xpZW50IiAiQSB1c2VyIHdobyBhY2Nlc3NlcyBhbmQgY29udHJpYnV0ZXMga25vd2xlZGdlIGNvbnRlbnQiCiAgICAgICAgYWRtaW5pc3RyYXRvciA9IHBlcnNvbiAiQWRtaW5pc3RyYXRvciIgIkEgdXNlciB3aG8gYWRtaW5pc3RlcnMgdGhlIEtub3dsZWRnZUdyYW0gcGxhdGZvcm0iCgogICAgICAgIGVudHJhID0gc29mdHdhcmVTeXN0ZW0gIk1pY3Jvc29mdCBFbnRyYSBJRCIgIlNoYXJlZCBpZGVudGl0eSBwcm92aWRlciBmb3IgY2xpZW50cyBhbmQgYWRtaW5pc3RyYXRvcnMiICJFeGlzdGluZyBTeXN0ZW0sRXh0ZXJuYWwgU3lzdGVtIgogICAgICAgIG5vdGlmaWNhdGlvblNlcnZpY2UgPSBzb2Z0d2FyZVN5c3RlbSAiTm90aWZpY2F0aW9uIFNlcnZpY2UiICJFeHRlcm5hbCBzZXJ2aWNlIGZvciBkZWxpdmVyaW5nIEtub3dsZWRnZUdyYW0gbm90aWZpY2F0aW9ucyIgIlBsYW5uZWQgU3lzdGVtLEV4dGVybmFsIFN5c3RlbSIKICAgICAgICBtaWNyb3NvZnRMZWFybiA9IHNvZnR3YXJlU3lzdGVtICJNaWNyb3NvZnQgTGVhcm4iICJQdXJjaGFzZWQgZXh0ZXJuYWwga25vd2xlZGdlIGFuZCBsZWFybmluZyBzb2x1dGlvbiIgIkV4aXN0aW5nIFN5c3RlbSxFeHRlcm5hbCBTeXN0ZW0iCgogICAgICAgIGtub3dsZWRnZUdyYW0gPSBzb2Z0d2FyZVN5c3RlbSAiS25vd2xlZGdlR3JhbSBQbGF0Zm9ybSIgIkEga25vd2xlZGdlLXNoYXJpbmcgcGxhdGZvcm0gd2hlcmUgY2xpZW50cyBhY2Nlc3MgYW5kIGNvbnRyaWJ1dGUgbGVhcm5pbmcgY29udGVudCwgYW5kIGFkbWluaXN0cmF0b3JzIG1hbmFnZSB0aGUgcGxhdGZvcm0iIHsKICAgICAgICAgICAgd2ViQXBwID0gY29udGFpbmVyICJLbm93bGVkZ2VHcmFtIFdlYiBBcHAiICJCbGF6b3IgU2VydmVyIGFwcGxpY2F0aW9uIHByb3ZpZGluZyB0aGUgdXNlciBpbnRlcmZhY2UgYW5kIGZlZWQsIHB1Ymxpc2hpbmcsIGFuZCBlbmdhZ2VtZW50IHdvcmtmbG93cyIgIkFTUC5ORVQgQ29yZSAvIEJsYXpvciBTZXJ2ZXIiIHsKICAgICAgICAgICAgICAgIGhvbWVQYWdlID0gY29tcG9uZW50ICJIb21lIFBhZ2UiICJEaXNwbGF5cyB0aGUgZmVlZCBhbmQgaGFuZGxlcyBzZWFyY2gsIHB1Ymxpc2hpbmcsIGxpa2VzLCBjb21tZW50cywgYW5kIGxvY2FsIHNpZ24taW4iICJCbGF6b3IgLyBIb21lLnJhem9yIgogICAgICAgICAgICAgICAgZmVlZFNlcnZpY2UgPSBjb21wb25lbnQgIkZlZWQgU2VydmljZSIgIkJyb3dzZXMsIHNlYXJjaGVzLCBhbmQgZmlsdGVycyBwb3N0czsgYnVpbGRzIGF0dGFjaG1lbnQgdmlld3MgYW5kIGRldGVybWluZXMgZGVsZXRlLWJ1dHRvbiB2aXNpYmlsaXR5IiAiQyMgLyBJRmVlZFNlcnZpY2UgLyBGZWVkU2VydmljZSIKICAgICAgICAgICAgICAgIHB1Ymxpc2hpbmdTZXJ2aWNlID0gY29tcG9uZW50ICJQdWJsaXNoaW5nIFNlcnZpY2UiICJWYWxpZGF0ZXMgYW5kIHB1Ymxpc2hlcyBwb3N0cyBhbmQgYXR0YWNobWVudHM7IGRlbGV0ZXMgcG9zdHMgb3duZWQgYnkgdGhlIGN1cnJlbnQgdXNlciIgIkMjIC8gSVB1Ymxpc2hpbmdTZXJ2aWNlIC8gUHVibGlzaGluZ1NlcnZpY2UiCiAgICAgICAgICAgICAgICBlbmdhZ2VtZW50U2VydmljZSA9IGNvbXBvbmVudCAiRW5nYWdlbWVudCBTZXJ2aWNlIiAiQWRkcyBsaWtlcyBhbmQgdmFsaWRhdGVzIGFuZCBhZGRzIGNvbW1lbnRzIiAiQyMgLyBJRW5nYWdlbWVudFNlcnZpY2UgLyBFbmdhZ2VtZW50U2VydmljZSIKICAgICAgICAgICAgICAgIHBvc3RSZXBvc2l0b3J5ID0gY29tcG9uZW50ICJQb3N0IFJlcG9zaXRvcnkiICJQZXJzaXN0cyBhbmQgcXVlcmllcyBwb3N0cywgY29tbWVudHMsIGFuZCBsaWtlIGNvdW50cyIgIkMjIC8gSVBvc3RSZXBvc2l0b3J5IC8gU3FsaXRlUG9zdFJlcG9zaXRvcnkiCiAgICAgICAgICAgICAgICBmaWxlU3RvcmFnZUFjY2VzcyA9IGNvbXBvbmVudCAiRmlsZSBTdG9yYWdlIEFjY2VzcyIgIlNhdmVzIGFuZCBkZWxldGVzIHVwbG9hZGVkIGZpbGVzIGFuZCBwcm92aWRlcyB0aGVpciBwdWJsaWMgVVJMcyIgIkMjIC8gSUZpbGVTdG9yYWdlIC8gTG9jYWxGaWxlU3RvcmFnZSIKICAgICAgICAgICAgICAgIHVzZXJTZXNzaW9uID0gY29tcG9uZW50ICJVc2VyIFNlc3Npb24iICJTdG9yZXMgdGhlIGNob3NlbiB1c2VybmFtZSBmb3IgdGhlIGJyb3dzZXIgY29ubmVjdGlvbjsgbm90IEVudHJhIGF1dGhlbnRpY2F0aW9uIiAiQyMgLyBJVXNlclNlc3Npb24gLyBJbk1lbW9yeVVzZXJTZXNzaW9uIgogICAgICAgICAgICAgICAgY29udGVudEtpbmRSZXNvbHZlciA9IGNvbXBvbmVudCAiQ29udGVudCBLaW5kIFJlc29sdmVyIiAiQ2xhc3NpZmllcyBhdHRhY2htZW50cyBhcyBpbWFnZXMsIHZpZGVvLCBhdWRpbywgb3IgZG9jdW1lbnRzIHVzaW5nIHRoZWlyIGZpbGUgZXh0ZW5zaW9ucyIgIkMjIC8gSUNvbnRlbnRLaW5kUmVzb2x2ZXIgLyBFeHRlbnNpb25Db250ZW50S2luZFJlc29sdmVyIgogICAgICAgICAgICAgICAgc3ViamVjdENhdGFsb2cgPSBjb21wb25lbnQgIlN1YmplY3QgQ2F0YWxvZyIgIlByb3ZpZGVzIHRoZSBmaXhlZCBsaXN0IG9mIHN1YmplY3RzIHVzZWQgYnkgdGhlIFVJIGFuZCBwdWJsaXNoaW5nIHZhbGlkYXRpb24iICJDIyAvIElTdWJqZWN0Q2F0YWxvZyAvIFN0YXRpY1N1YmplY3RDYXRhbG9nIgogICAgICAgICAgICAgICAgY2xvY2sgPSBjb21wb25lbnQgIkNsb2NrIiAiUHJvdmlkZXMgdGhlIGN1cnJlbnQgdGltZSBmb3IgcG9zdCBhbmQgY29tbWVudCB0aW1lc3RhbXBzIiAiQyMgLyBJQ2xvY2sgLyBTeXN0ZW1DbG9jayIKICAgICAgICAgICAgfQogICAgICAgICAgICBjb250ZW50RGF0YWJhc2UgPSBjb250YWluZXIgIkNvbnRlbnQgRGF0YWJhc2UiICJTdG9yZXMga25vd2xlZGdlIHBvc3RzLCBjb21tZW50cywgYW5kIGVuZ2FnZW1lbnQgZGF0YSIgIlNRTGl0ZSIgIkRhdGFiYXNlIgogICAgICAgICAgICBmaWxlU3RvcmFnZSA9IGNvbnRhaW5lciAiTG9jYWwgRmlsZSBTdG9yYWdlIiAiU3RvcmVzIHVwbG9hZGVkIGxlYXJuaW5nIG1hdGVyaWFscyBvbiB0aGUgd2ViIHNlcnZlcidzIGRpc2siICJGaWxlIHN5c3RlbSIKICAgICAgICAgICAgY29udGVudE5vdGlmaWNhdGlvbkZ1bmN0aW9uID0gY29udGFpbmVyICJDb250ZW50IE5vdGlmaWNhdGlvbiBGdW5jdGlvbiIgIlBsYW5uZWQ6IGNoZWNrcyBmb3IgbmV3IGNvbnRlbnQgbWF0Y2hpbmcgdXNlciBwcmVmZXJlbmNlcyBhbmQgcmVxdWVzdHMgbm90aWZpY2F0aW9ucyB3aGVuIG1hdGNoZXMgYXJlIGZvdW5kIiAiQXp1cmUgRnVuY3Rpb25zIiAiUGxhbm5lZCBTeXN0ZW0sQ29udGVudCBDaGVja2VyIgogICAgICAgICAgICBub3RpZmljYXRpb25CdXMgPSBjb250YWluZXIgIk5vdGlmaWNhdGlvbiBCdXMiICJQbGFubmVkOiBxdWV1ZXMgbm90aWZpY2F0aW9uIHJlcXVlc3RzIGZyb20gdGhlIFdlYiBBcHAgYW5kIENvbnRlbnQgTm90aWZpY2F0aW9uIEZ1bmN0aW9uIiAiTWVzc2FnZSBidXMiICJQbGFubmVkIFN5c3RlbSxBc3luYyBBbHRlcm5hdGl2ZSxNZXNzYWdlIEJ1cyIKICAgICAgICAgICAgbm90aWZpY2F0aW9uUHJvY2Vzc29yID0gY29udGFpbmVyICJOb3RpZmljYXRpb24gUHJvY2Vzc29yIEZ1bmN0aW9uIiAiUGxhbm5lZDogY29uc3VtZXMgcXVldWVkIG5vdGlmaWNhdGlvbiByZXF1ZXN0cyBhbmQgaW52b2tlcyB0aGUgTm90aWZpY2F0aW9uIFNlcnZpY2UiICJBenVyZSBGdW5jdGlvbnMiICJQbGFubmVkIFN5c3RlbSxBc3luYyBBbHRlcm5hdGl2ZSxNZXNzYWdlIFByb2Nlc3NvciIKICAgICAgICAgICAgbGVhcm5pbmdCdXMgPSBjb250YWluZXIgIkxlYXJuaW5nIEludGVncmF0aW9uIEJ1cyIgIlBsYW5uZWQ6IHF1ZXVlcyByZXF1ZXN0cyB0byByZXRyaWV2ZSBjb250ZW50IGZyb20gTWljcm9zb2Z0IExlYXJuIiAiTWVzc2FnZSBidXMiICJQbGFubmVkIFN5c3RlbSxBc3luYyBBbHRlcm5hdGl2ZSxNZXNzYWdlIEJ1cyIKICAgICAgICAgICAgbGVhcm5pbmdQcm9jZXNzb3IgPSBjb250YWluZXIgIkxlYXJuaW5nIEludGVncmF0aW9uIEZ1bmN0aW9uIiAiUGxhbm5lZDogY29uc3VtZXMgbGVhcm5pbmcgcmVxdWVzdHMsIHJldHJpZXZlcyBNaWNyb3NvZnQgTGVhcm4gY29udGVudCwgYW5kIHN1Ym1pdHMgcmVzdWx0cyB0byB0aGUgV2ViIEFwcCBmb3IgcGVyc2lzdGVuY2UiICJBenVyZSBGdW5jdGlvbnMiICJQbGFubmVkIFN5c3RlbSxBc3luYyBBbHRlcm5hdGl2ZSxNZXNzYWdlIFByb2Nlc3NvciIKICAgICAgICB9CgogICAgICAgIGNsaWVudCAtPiBrbm93bGVkZ2VHcmFtICJVc2VzIHRvIGFjY2VzcyBhbmQgY29udHJpYnV0ZSBrbm93bGVkZ2UiICJIVFRQUyIKICAgICAgICBhZG1pbmlzdHJhdG9yIC0+IGtub3dsZWRnZUdyYW0gIlVzZXMgdG8gYWRtaW5pc3RlciB0aGUgcGxhdGZvcm0iICJIVFRQUyIKCiAgICAgICAgY2xpZW50IC0+IGVudHJhICJXaWxsIGF1dGhlbnRpY2F0ZSB0aHJvdWdoIiAiIiAiUGxhbm5lZCIKICAgICAgICBhZG1pbmlzdHJhdG9yIC0+IGVudHJhICJXaWxsIGF1dGhlbnRpY2F0ZSB0aHJvdWdoIiAiIiAiUGxhbm5lZCIKICAgICAgICBrbm93bGVkZ2VHcmFtIC0+IGVudHJhICJXaWxsIHVzZSBmb3Igc2lnbi1pbiIgIiIgIlBsYW5uZWQiCiAgICAgICAga25vd2xlZGdlR3JhbSAtPiBub3RpZmljYXRpb25TZXJ2aWNlICJXaWxsIHNlbmQgbm90aWZpY2F0aW9ucyB0aHJvdWdoIiAiIiAiUGxhbm5lZCIKICAgICAgICBrbm93bGVkZ2VHcmFtIC0+IG1pY3Jvc29mdExlYXJuICJXaWxsIGludGVncmF0ZSB3aXRoIHB1cmNoYXNlZCBsZWFybmluZyBjb250ZW50IiAiIiAiUGxhbm5lZCIKCiAgICAgICAgY2xpZW50IC0+IHdlYkFwcCAiVXNlcyIgIkhUVFBTIgogICAgICAgIGFkbWluaXN0cmF0b3IgLT4gd2ViQXBwICJVc2VzIiAiSFRUUFMiCiAgICAgICAgd2ViQXBwIC0+IGNvbnRlbnREYXRhYmFzZSAiUmVhZHMgYW5kIHdyaXRlcyBwb3N0cywgY29tbWVudHMsIGFuZCBlbmdhZ2VtZW50IGRhdGEiICJTUUxpdGUiCiAgICAgICAgd2ViQXBwIC0+IGZpbGVTdG9yYWdlICJTdG9yZXMgYW5kIHJldHJpZXZlcyB1cGxvYWRlZCBsZWFybmluZyBtYXRlcmlhbHMiICJGaWxlIEkvTyIKICAgICAgICB3ZWJBcHAgLT4gZW50cmEgIldpbGwgdXNlIGZvciBzaWduLWluIiAiIiAiUGxhbm5lZCIKICAgICAgICB3ZWJBcHAgLT4gbm90aWZpY2F0aW9uU2VydmljZSAiV2lsbCBzZW5kIG5vdGlmaWNhdGlvbnMgdGhyb3VnaCIgIiIgIlBsYW5uZWQsU3luY2hyb25vdXMiCiAgICAgICAgd2ViQXBwIC0+IG1pY3Jvc29mdExlYXJuICJXaWxsIGludGVncmF0ZSB3aXRoIHB1cmNoYXNlZCBsZWFybmluZyBjb250ZW50IiAiIiAiUGxhbm5lZCxTeW5jaHJvbm91cyIKCiAgICAgICAgY29udGVudE5vdGlmaWNhdGlvbkZ1bmN0aW9uIC0+IHdlYkFwcCAiV2lsbCByZXRyaWV2ZSB1c2VyIHByZWZlcmVuY2VzIGFuZCBjaGVjayBmb3IgbWF0Y2hpbmcgbmV3IGNvbnRlbnQgdmlhIiAiIiAiUGxhbm5lZCIKICAgICAgICBjb250ZW50Tm90aWZpY2F0aW9uRnVuY3Rpb24gLT4gbm90aWZpY2F0aW9uU2VydmljZSAiV2lsbCBzZW5kIG5vdGlmaWNhdGlvbnMgYWJvdXQgbWF0Y2hpbmcgbmV3IGNvbnRlbnQgdGhyb3VnaCIgIiIgIlBsYW5uZWQsU3luY2hyb25vdXMiCgogICAgICAgIHdlYkFwcCAtPiBub3RpZmljYXRpb25CdXMgIldpbGwgZW5xdWV1ZSBub3RpZmljYXRpb24gcmVxdWVzdHMgb24iICIiICJQbGFubmVkIgogICAgICAgIGNvbnRlbnROb3RpZmljYXRpb25GdW5jdGlvbiAtPiBub3RpZmljYXRpb25CdXMgIldpbGwgZW5xdWV1ZSBub3RpZmljYXRpb25zIGFib3V0IG1hdGNoaW5nIG5ldyBjb250ZW50IG9uIiAiIiAiUGxhbm5lZCIKICAgICAgICBub3RpZmljYXRpb25Qcm9jZXNzb3IgLT4gbm90aWZpY2F0aW9uQnVzICJXaWxsIGNvbnN1bWUgbm90aWZpY2F0aW9uIHJlcXVlc3RzIGZyb20iICIiICJQbGFubmVkIgogICAgICAgIG5vdGlmaWNhdGlvblByb2Nlc3NvciAtPiBub3RpZmljYXRpb25TZXJ2aWNlICJXaWxsIGludm9rZSB0byBkZWxpdmVyIHF1ZXVlZCBub3RpZmljYXRpb25zIiAiIiAiUGxhbm5lZCIKCiAgICAgICAgd2ViQXBwIC0+IGxlYXJuaW5nQnVzICJXaWxsIGVucXVldWUgbGVhcm5pbmcgY29udGVudCByZXF1ZXN0cyBvbiIgIiIgIlBsYW5uZWQiCiAgICAgICAgbGVhcm5pbmdQcm9jZXNzb3IgLT4gbGVhcm5pbmdCdXMgIldpbGwgY29uc3VtZSBsZWFybmluZyBjb250ZW50IHJlcXVlc3RzIGZyb20iICIiICJQbGFubmVkIgogICAgICAgIGxlYXJuaW5nUHJvY2Vzc29yIC0+IG1pY3Jvc29mdExlYXJuICJXaWxsIHJldHJpZXZlIHJlcXVlc3RlZCBsZWFybmluZyBjb250ZW50IGZyb20iICIiICJQbGFubmVkIgogICAgICAgIGxlYXJuaW5nUHJvY2Vzc29yIC0+IHdlYkFwcCAiV2lsbCBzdWJtaXQgcmVzdWx0cyBmb3Igc3RvcmFnZSBpbiB0aGUgQ29udGVudCBEYXRhYmFzZSBvciBMb2NhbCBGaWxlIFN0b3JhZ2UiICIiICJQbGFubmVkIgoKICAgICAgICBjbGllbnQgLT4gaG9tZVBhZ2UgIkJyb3dzZXMgYW5kIGNvbnRyaWJ1dGVzIGtub3dsZWRnZSB0aHJvdWdoIiAiSFRUUFMgLyBCbGF6b3IiCiAgICAgICAgaG9tZVBhZ2UgLT4gZmVlZFNlcnZpY2UgIkxvYWRzIHRoZSBmZWVkIHRocm91Z2giCiAgICAgICAgaG9tZVBhZ2UgLT4gcHVibGlzaGluZ1NlcnZpY2UgIlB1Ymxpc2hlcyBhbmQgZGVsZXRlcyBwb3N0cyB0aHJvdWdoIgogICAgICAgIGhvbWVQYWdlIC0+IGVuZ2FnZW1lbnRTZXJ2aWNlICJMaWtlcyBhbmQgY29tbWVudHMgdGhyb3VnaCIKICAgICAgICBob21lUGFnZSAtPiB1c2VyU2Vzc2lvbiAiU2lnbnMgaW4sIHNpZ25zIG91dCwgYW5kIHJlYWRzIHRoZSBjdXJyZW50IHVzZXIiCiAgICAgICAgaG9tZVBhZ2UgLT4gc3ViamVjdENhdGFsb2cgIkxvYWRzIHN1YmplY3RzIGZyb20iCgogICAgICAgIGZlZWRTZXJ2aWNlIC0+IHBvc3RSZXBvc2l0b3J5ICJRdWVyaWVzIHBvc3RzIGFuZCBjb21tZW50cyB0aHJvdWdoIgogICAgICAgIGZlZWRTZXJ2aWNlIC0+IGZpbGVTdG9yYWdlQWNjZXNzICJHZXRzIGF0dGFjaG1lbnQgVVJMcyBmcm9tIgogICAgICAgIGZlZWRTZXJ2aWNlIC0+IGNvbnRlbnRLaW5kUmVzb2x2ZXIgIkNsYXNzaWZpZXMgYXR0YWNobWVudHMgdGhyb3VnaCIKICAgICAgICBmZWVkU2VydmljZSAtPiB1c2VyU2Vzc2lvbiAiUmVhZHMgdGhlIGN1cnJlbnQgdXNlciB0byBkZXRlcm1pbmUgZGVsZXRlLWJ1dHRvbiB2aXNpYmlsaXR5IgoKICAgICAgICBwdWJsaXNoaW5nU2VydmljZSAtPiBwb3N0UmVwb3NpdG9yeSAiQ3JlYXRlcywgcmV0cmlldmVzLCBhbmQgZGVsZXRlcyBwb3N0cyB0aHJvdWdoIgogICAgICAgIHB1Ymxpc2hpbmdTZXJ2aWNlIC0+IGZpbGVTdG9yYWdlQWNjZXNzICJDaGVja3MgdXBsb2FkIHNpemUgYW5kIHNhdmVzIGFuZCBkZWxldGVzIGF0dGFjaG1lbnRzIHRocm91Z2giCiAgICAgICAgcHVibGlzaGluZ1NlcnZpY2UgLT4gdXNlclNlc3Npb24gIkNoZWNrcyBzaWduLWluIGFuZCBwb3N0IG93bmVyc2hpcCB1c2luZyIKICAgICAgICBwdWJsaXNoaW5nU2VydmljZSAtPiBzdWJqZWN0Q2F0YWxvZyAiVmFsaWRhdGVzIHN1YmplY3RzIGFnYWluc3QiCgogICAgICAgIGVuZ2FnZW1lbnRTZXJ2aWNlIC0+IHBvc3RSZXBvc2l0b3J5ICJVcGRhdGVzIGxpa2VzIGFuZCBhZGRzIGNvbW1lbnRzIHRocm91Z2giCiAgICAgICAgZW5nYWdlbWVudFNlcnZpY2UgLT4gdXNlclNlc3Npb24gIkNoZWNrcyBzaWduLWluIGFuZCBpZGVudGlmaWVzIGNvbW1lbnQgYXV0aG9ycyB1c2luZyIKCiAgICAgICAgcG9zdFJlcG9zaXRvcnkgLT4gY2xvY2sgIkdldHMgcG9zdCBhbmQgY29tbWVudCB0aW1lc3RhbXBzIGZyb20iCiAgICAgICAgcG9zdFJlcG9zaXRvcnkgLT4gY29udGVudERhdGFiYXNlICJSZWFkcyBhbmQgd3JpdGVzIHBvc3RzLCBjb21tZW50cywgYW5kIGVuZ2FnZW1lbnQgZGF0YSIgIlNRTGl0ZSIKICAgICAgICBmaWxlU3RvcmFnZUFjY2VzcyAtPiBmaWxlU3RvcmFnZSAiU3RvcmVzIGFuZCByZXRyaWV2ZXMgdXBsb2FkZWQgbGVhcm5pbmcgbWF0ZXJpYWxzIiAiRmlsZSBJL08iCiAgICB9CgogICAgdmlld3MgewogICAgICAgIHN5c3RlbUNvbnRleHQga25vd2xlZGdlR3JhbSAiU3lzdGVtQ29udGV4dCIgIlN5c3RlbSBDb250ZXh0IGRpYWdyYW0gZm9yIEtub3dsZWRnZUdyYW0iIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGF1dG9MYXlvdXQKICAgICAgICB9CgogICAgICAgIGNvbnRhaW5lciBrbm93bGVkZ2VHcmFtICJDb250YWluZXJzIiAiQ29udGFpbmVyIGRpYWdyYW0gZm9yIEtub3dsZWRnZUdyYW0gKHN5bmNocm9ub3VzIGFsdGVybmF0aXZlKSIgewogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgZXhjbHVkZSAiZWxlbWVudC50YWc9PUFzeW5jIEFsdGVybmF0aXZlIgogICAgICAgICAgICBhdXRvTGF5b3V0CiAgICAgICAgfQoKICAgICAgICBjb250YWluZXIga25vd2xlZGdlR3JhbSAiQ29udGFpbmVyc0FzeW5jIiAiQ29udGFpbmVyIGRpYWdyYW0gZm9yIEtub3dsZWRnZUdyYW0gKGFzeW5jaHJvbm91cyBhbHRlcm5hdGl2ZSkiIHsKICAgICAgICAgICAgaW5jbHVkZSAqCiAgICAgICAgICAgIGV4Y2x1ZGUgInJlbGF0aW9uc2hpcC50YWc9PVN5bmNocm9ub3VzIgogICAgICAgICAgICBhdXRvTGF5b3V0CiAgICAgICAgfQoKICAgICAgICBjb21wb25lbnQgd2ViQXBwICJXZWJBcHBDb21wb25lbnRzIiAiQ29tcG9uZW50IGRpYWdyYW0gZm9yIEtub3dsZWRnZUdyYW0gV2ViIEFwcCAoY3VycmVudCBydW50aW1lIGltcGxlbWVudGF0aW9uKSIgewogICAgICAgICAgICBpbmNsdWRlICoKICAgICAgICAgICAgZXhjbHVkZSAiZWxlbWVudC50YWc9PUFzeW5jIEFsdGVybmF0aXZlIgogICAgICAgICAgICBhdXRvTGF5b3V0CiAgICAgICAgfQoKICAgICAgICBzdHlsZXMgewogICAgICAgICAgICBlbGVtZW50ICJFeHRlcm5hbCBTeXN0ZW0iIHsKICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzk5OTk5OQogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIkNvbnRlbnQgQ2hlY2tlciIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjZmZmZmZmCiAgICAgICAgICAgICAgICBjb2xvciAjMzMzMzMzCiAgICAgICAgICAgICAgICBzdHJva2UgIzk5OTk5OQogICAgICAgICAgICB9CiAgICAgICAgICAgIGVsZW1lbnQgIk1lc3NhZ2UgQnVzIiB7CiAgICAgICAgICAgICAgICBiYWNrZ3JvdW5kICMzYjgyYzQKICAgICAgICAgICAgICAgIGNvbG9yICNmZmZmZmYKICAgICAgICAgICAgfQogICAgICAgICAgICBlbGVtZW50ICJNZXNzYWdlIFByb2Nlc3NvciIgewogICAgICAgICAgICAgICAgYmFja2dyb3VuZCAjODA2NGEyCiAgICAgICAgICAgICAgICBjb2xvciAjZmZmZmZmCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiRGF0YWJhc2UiIHsKICAgICAgICAgICAgICAgIHNoYXBlIEN5bGluZGVyCiAgICAgICAgICAgIH0KICAgICAgICAgICAgZWxlbWVudCAiUGVyc29uIiB7CiAgICAgICAgICAgICAgICBzaGFwZSBQZXJzb24KICAgICAgICAgICAgICAgIGJhY2tncm91bmQgIzA4NDI3YgogICAgICAgICAgICAgICAgY29sb3IgI2ZmZmZmZgogICAgICAgICAgICB9CiAgICAgICAgICAgIHJlbGF0aW9uc2hpcCAiUGxhbm5lZCIgewogICAgICAgICAgICAgICAgY29sb3IgIzc3Nzc3NwogICAgICAgICAgICAgICAgc3R5bGUgZGFzaGVkCiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9Cn0=",
+    "structurizr.inspection.info" : "0",
+    "structurizr.inspection.ignore" : "0",
+    "structurizr.inspection.warning" : "0"
+  },
+  "views" : {
+    "componentViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "containerId" : "7",
+      "description" : "Component diagram for KnowledgeGram Web App (current runtime implementation)",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "8",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "9",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "10",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "11",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "12",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "13",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "14",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "15",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "16",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "17",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "19",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalContainerBoundariesVisible" : false,
+      "key" : "WebAppComponents",
+      "name" : "Component View: KnowledgeGram Platform - KnowledgeGram Web App",
+      "order" : 4,
+      "relationships" : [ {
+        "id" : "49"
+      }, {
+        "id" : "50"
+      }, {
+        "id" : "51"
+      }, {
+        "id" : "52"
+      }, {
+        "id" : "53"
+      }, {
+        "id" : "54"
+      }, {
+        "id" : "55"
+      }, {
+        "id" : "56"
+      }, {
+        "id" : "57"
+      }, {
+        "id" : "58"
+      }, {
+        "id" : "59"
+      }, {
+        "id" : "60"
+      }, {
+        "id" : "61"
+      }, {
+        "id" : "62"
+      }, {
+        "id" : "63"
+      }, {
+        "id" : "64"
+      }, {
+        "id" : "65"
+      }, {
+        "id" : "66"
+      }, {
+        "id" : "67"
+      } ]
+    } ],
+    "configuration" : {
+      "styles" : {
+        "elements" : [ {
+          "background" : "#ffffff",
+          "color" : "#333333",
+          "stroke" : "#999999",
+          "tag" : "Content Checker"
+        }, {
+          "shape" : "Cylinder",
+          "tag" : "Database"
+        }, {
+          "background" : "#999999",
+          "color" : "#ffffff",
+          "tag" : "External System"
+        }, {
+          "background" : "#3b82c4",
+          "color" : "#ffffff",
+          "tag" : "Message Bus"
+        }, {
+          "background" : "#8064a2",
+          "color" : "#ffffff",
+          "tag" : "Message Processor"
+        }, {
+          "background" : "#08427b",
+          "color" : "#ffffff",
+          "shape" : "Person",
+          "tag" : "Person"
+        } ],
+        "relationships" : [ {
+          "color" : "#777777",
+          "style" : "Dashed",
+          "tag" : "Planned"
+        } ]
+      },
+      "terminology" : { }
+    },
+    "containerViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "Container diagram for KnowledgeGram (synchronous alternative)",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "19",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "Containers",
+      "name" : "Container View: KnowledgeGram Platform",
+      "order" : 2,
+      "relationships" : [ {
+        "id" : "27"
+      }, {
+        "id" : "28"
+      }, {
+        "id" : "32"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "35"
+      }, {
+        "id" : "36"
+      }, {
+        "id" : "37"
+      }, {
+        "id" : "38"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "40"
+      } ],
+      "softwareSystemId" : "6"
+    }, {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "Container diagram for KnowledgeGram (asynchronous alternative)",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "7",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "18",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "19",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "20",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "21",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "22",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "23",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "24",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "externalSoftwareSystemBoundariesVisible" : false,
+      "key" : "ContainersAsync",
+      "name" : "Container View: KnowledgeGram Platform",
+      "order" : 3,
+      "relationships" : [ {
+        "id" : "27"
+      }, {
+        "id" : "28"
+      }, {
+        "id" : "32"
+      }, {
+        "id" : "33"
+      }, {
+        "id" : "34"
+      }, {
+        "id" : "35"
+      }, {
+        "id" : "36"
+      }, {
+        "id" : "39"
+      }, {
+        "id" : "41"
+      }, {
+        "id" : "42"
+      }, {
+        "id" : "43"
+      }, {
+        "id" : "44"
+      }, {
+        "id" : "45"
+      }, {
+        "id" : "46"
+      }, {
+        "id" : "47"
+      }, {
+        "id" : "48"
+      } ],
+      "softwareSystemId" : "6"
+    } ],
+    "systemContextViews" : [ {
+      "automaticLayout" : {
+        "edgeSeparation" : 50,
+        "nodeSeparation" : 50,
+        "rankDirection" : "LeftRight",
+        "rankSeparation" : 100,
+        "vertices" : true
+      },
+      "description" : "System Context diagram for KnowledgeGram",
+      "elements" : [ {
+        "id" : "1",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "2",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "3",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "4",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "5",
+        "x" : 0,
+        "y" : 0
+      }, {
+        "id" : "6",
+        "x" : 0,
+        "y" : 0
+      } ],
+      "enterpriseBoundaryVisible" : true,
+      "key" : "SystemContext",
+      "name" : "System Context View: KnowledgeGram Platform",
+      "order" : 1,
+      "relationships" : [ {
+        "id" : "25"
+      }, {
+        "id" : "26"
+      }, {
+        "id" : "27"
+      }, {
+        "id" : "28"
+      }, {
+        "id" : "29"
+      }, {
+        "id" : "30"
+      }, {
+        "id" : "31"
+      } ],
+      "softwareSystemId" : "6"
+    } ]
+  }
+}
